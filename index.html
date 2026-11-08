@@ -43,6 +43,13 @@
     padding-bottom: 0; border-bottom: 12px solid #f7f8fa;
   }
   .meta { color: #667; font-size: 17px; margin: 10px 2px 0; }
+  .card.closed { padding: 6px 18px; margin-bottom: 10px; }
+  .title-btn {
+    width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    background: none; color: #1d2430; font-size: 22px; text-align: left; padding: 8px 0;
+  }
+  .title-btn .arrow { color: #8a94a3; font-size: 18px; flex: none; }
+  .card:not(.closed) .title-btn { margin-bottom: 4px; }
   button {
     font-size: 21px; font-weight: 700; border: none; border-radius: 12px;
     padding: 12px 16px; cursor: pointer; min-height: 56px; font-family: inherit;
@@ -270,16 +277,19 @@ function renderPrompts() {
 function cardHtml(p) {
   const open = opened.has(p.id);
   const cs = comments.filter(c => c.prompt_id === p.id);
+  const head = `<button class="title-btn" data-toggle="${p.id}" aria-expanded="${open}">
+      <span>${esc(p.title)}</span><span class="arrow">${open ? "▲" : "▼"}</span></button>`;
+  if (!open) return `<article class="card closed" id="card-${p.id}">${head}</article>`;
   return `
   <article class="card" id="card-${p.id}">
-    <h2>${esc(p.title)}</h2>
+    ${head}
     ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
-    <p class="body ${open ? "" : "clamp"}">${esc(p.body)}</p>
+    <p class="body">${esc(p.body)}</p>
     <div class="row">
-      <button class="toggle" data-toggle="${p.id}">${open ? "접기 ▲" : "펼쳐 보기 ▼"}</button>
+      <button class="toggle" data-toggle="${p.id}">접기 ▲</button>
       <button class="copy" data-copy="${p.id}">📋 복사하기</button>
     </div>
-    ${open ? commentsHtml(p.id, cs) : `<p class="meta">💬 댓글 ${cs.length}개</p>`}
+    ${commentsHtml(p.id, cs)}
     ${isAdmin ? `<div class="row">
       <button class="edit" data-edit="${p.id}">수정</button>
       <button class="del" data-del="${p.id}">삭제</button>
