@@ -265,7 +265,16 @@ function toast(msg) {
 }
 
 /* ---------- 관리자 로그인 ---------- */
-function showLogin() { $("loginPanel").hidden = false; $("email").focus(); }
+/* 이 기기에서 마지막으로 로그인한 이메일 기억 (기기 안에만 저장, 화면 코드에는 없음) */
+function savedEmail() { try { return localStorage.getItem("adminEmail") || ""; } catch { return ""; } }
+function saveEmail(v) { try { localStorage.setItem("adminEmail", v); } catch {} }
+
+function showLogin() {
+  $("loginPanel").hidden = false;
+  const em = savedEmail();
+  if (em && !$("email").value) $("email").value = em;
+  ($("email").value ? $("password") : $("email")).focus();
+}
 function hideLogin() {
   $("loginPanel").hidden = true; $("loginMsg").textContent = "";
   if (location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search);
@@ -281,6 +290,7 @@ $("loginBtn").addEventListener("click", async () => {
     email: $("email").value.trim(), password: $("password").value
   });
   if (error) { $("loginMsg").textContent = "로그인 실패: 이메일과 비밀번호를 확인해 주세요."; return; }
+  saveEmail($("email").value.trim());
   $("password").value = "";
   hideLogin();
 });
