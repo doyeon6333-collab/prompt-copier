@@ -12,9 +12,12 @@
   }
   header {
     position: sticky; top: 0; z-index: 5; background: #fff;
-    padding: 14px 16px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 12px 16px 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
   }
   h1 { font-size: 24px; margin: 0 0 10px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+  .tabs button { flex: 1; background: #e8ecf1; color: #1d2430; min-height: 52px; }
+  .tabs button.on { background: #1d2430; color: #fff; }
   #search {
     width: 100%; font-size: 22px; padding: 14px 16px;
     border: 2px solid #b8c2cf; border-radius: 12px;
@@ -33,20 +36,35 @@
   }
   .body {
     white-space: pre-wrap; word-break: break-word; background: #f7f8fa;
-    border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; font-size: 19px;
+    border-radius: 10px; padding: 12px 14px; margin: 0 0 12px; font-size: 19px;
   }
+  .clamp {
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .meta { color: #667; font-size: 17px; margin: 10px 2px 0; }
   button {
     font-size: 21px; font-weight: 700; border: none; border-radius: 12px;
-    padding: 14px 18px; cursor: pointer; min-height: 56px;
+    padding: 12px 16px; cursor: pointer; min-height: 56px; font-family: inherit;
   }
-  .copy { width: 100%; background: #1f6feb; color: #fff; }
-  .copy:active { background: #1655b8; }
+  button:disabled { opacity: .6; }
   .row { display: flex; gap: 10px; margin-top: 10px; }
   .row button { flex: 1; }
+  .copy { background: #1f6feb; color: #fff; }
+  .copy:active { background: #1655b8; }
+  .toggle { background: #e8ecf1; color: #1d2430; }
   .edit { background: #e8ecf1; color: #1d2430; }
   .del  { background: #fde8e8; color: #b42318; }
   .primary { background: #1f6feb; color: #fff; }
   .plain { background: #e8ecf1; color: #1d2430; }
+  .small-del {
+    background: none; color: #b42318; font-size: 16px; min-height: 40px;
+    padding: 4px 10px; border: 1px solid #f3c1bd;
+  }
+  .small-btn {
+    background: none; color: #1d2430; font-size: 16px; min-height: 40px;
+    padding: 4px 10px; border: 1px solid #c9d1db;
+  }
+  .review .who { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .panel { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 16px;
            border: 2px solid #1f6feb; }
   .panel h2 { margin: 0 0 10px; font-size: 22px; }
@@ -55,15 +73,26 @@
     width: 100%; font-size: 20px; padding: 12px 14px; font-family: inherit;
     border: 2px solid #b8c2cf; border-radius: 10px;
   }
-  textarea { min-height: 180px; resize: vertical; }
+  textarea { min-height: 120px; resize: vertical; }
+  #fBody { min-height: 180px; }
+  .comments { border-top: 2px dashed #dde3ea; margin-top: 16px; padding-top: 12px; }
+  .comments h3 { font-size: 20px; margin: 0 0 8px; }
+  .cmt { background: #f7f8fa; border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; }
+  .cmt .who { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .cmt p { margin: 4px 0 0; white-space: pre-wrap; word-break: break-word; }
+  .date { color: #8a94a3; font-size: 16px; font-weight: 400; margin-left: 6px; }
+  .cform { margin-top: 10px; }
+  .cform textarea { min-height: 90px; margin-top: 8px; }
+  .review p { white-space: pre-wrap; word-break: break-word; margin: 8px 0 0; }
   .msg { text-align: center; color: #556; padding: 30px 10px; }
-  .err { color: #b42318; font-weight: 700; }
+  .err { color: #b42318; font-weight: 700; font-size: 18px; }
+  .hint { color: #667; font-size: 16px; margin: 4px 2px 0; }
   #toast {
     position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
     background: #12805c; color: #fff; font-size: 22px; font-weight: 700;
     padding: 16px 28px; border-radius: 999px; width: max-content;
     max-width: 92vw; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,.25);
-    opacity: 0; pointer-events: none; transition: opacity .2s;
+    opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20;
   }
   #toast.show { opacity: 1; }
   footer { text-align: center; padding: 10px 0 40px; }
@@ -75,11 +104,15 @@
 
 <header>
   <h1>📋 수업용 프롬프트</h1>
+  <div class="tabs">
+    <button id="tabPrompts" class="on">프롬프트</button>
+    <button id="tabReviews">수업 후기</button>
+  </div>
   <input id="search" type="search" placeholder="🔍 검색어를 입력하세요" aria-label="프롬프트 검색">
 </header>
 
 <main>
-  <!-- 관리자 로그인 (주소 끝에 #admin 을 붙여야 보임) -->
+  <!-- 관리자 로그인 -->
   <section id="loginPanel" class="panel" hidden>
     <h2>관리자 로그인</h2>
     <label for="email">이메일</label>
@@ -102,25 +135,44 @@
     </div>
   </section>
 
-  <!-- 추가 / 수정 입력창 -->
-  <section id="editor" class="panel" hidden>
-    <h2 id="editorTitle">새 프롬프트</h2>
-    <label for="fTitle">제목</label>
-    <input id="fTitle" type="text">
-    <label for="fCat">분류</label>
-    <input id="fCat" type="text" list="catList" placeholder="예: 글쓰기, 사진, 여행">
-    <datalist id="catList"></datalist>
-    <label for="fBody">프롬프트 본문</label>
-    <textarea id="fBody"></textarea>
-    <div class="row">
-      <button class="primary" id="saveBtn">저장</button>
-      <button class="plain" id="cancelBtn">취소</button>
-    </div>
-    <p id="editorMsg" class="err"></p>
-  </section>
+  <!-- ===== 프롬프트 화면 ===== -->
+  <div id="promptView">
+    <section id="editor" class="panel" hidden>
+      <h2 id="editorTitle">새 프롬프트</h2>
+      <label for="fTitle">제목</label>
+      <input id="fTitle" type="text">
+      <label for="fCat">분류</label>
+      <input id="fCat" type="text" list="catList" placeholder="예: 글쓰기, 사진, 여행">
+      <datalist id="catList"></datalist>
+      <label for="fBody">프롬프트 본문</label>
+      <textarea id="fBody"></textarea>
+      <div class="row">
+        <button class="primary" id="saveBtn">저장</button>
+        <button class="plain" id="cancelBtn">취소</button>
+      </div>
+      <p id="editorMsg" class="err"></p>
+    </section>
 
-  <p class="count" id="count"></p>
-  <div id="list"><p class="msg">불러오는 중…</p></div>
+    <p class="count" id="count"></p>
+    <div id="list"><p class="msg">불러오는 중…</p></div>
+  </div>
+
+  <!-- ===== 수업 후기 화면 ===== -->
+  <div id="reviewView" hidden>
+    <section class="panel">
+      <h2>✍️ 수업 후기 쓰기</h2>
+      <label for="rName">이름 (실명)</label>
+      <input id="rName" type="text" autocomplete="name" placeholder="예: 홍길동">
+      <label for="rPw">비밀번호 (4자 이상)</label>
+      <input id="rPw" type="password" autocomplete="new-password" placeholder="나중에 수정·삭제할 때 필요합니다">
+      <label for="rText">후기</label>
+      <textarea id="rText" placeholder="수업에서 좋았던 점, 바라는 점을 자유롭게 적어 주세요."></textarea>
+      <div class="row"><button class="primary" id="rPost">후기 등록</button></div>
+      <p id="rMsg" class="err"></p>
+    </section>
+    <p class="count" id="rcount"></p>
+    <div id="rlist"></div>
+  </div>
 </main>
 
 <footer><a href="#admin" id="adminLink">관리자</a></footer>
@@ -129,27 +181,36 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ================================================================
-   ▼ 여기 두 줄만 내 Supabase 값으로 바꾸세요.
-   - URL : Supabase > Project Settings > API(또는 Data API) 의 Project URL
-   - KEY : 공개용 키 (Publishable key 또는 anon public key)
-   ※ 공개용 키는 원래 화면에 노출되어도 되는 키입니다.
-     실제 권한은 Supabase의 보안 규칙(setup.sql)이 막아 줍니다.
+   Supabase 연결 정보
+   - URL : 프로젝트 주소
+   - KEY : 공개용 키 (Publishable key) — 화면에 공개되어도 되는 키입니다.
+   ※ 실제 권한은 Supabase의 보안 규칙이 막아 줍니다.
    ※ secret / service_role 키는 절대 넣지 마세요.
    ================================================================ */
 const SUPABASE_URL = "https://xqbgoaanbwkuwkwtxkwa.supabase.co";
 const SUPABASE_KEY = "sb_publishable_RdL4EHNDjYWPWArXbZOKhw_ZoRrINpZ";
 /* ================================================================ */
 
+const NAME_RE = /^[가-힣]{2,10}$/;          // 실명: 한글 2~10자
+const NAME_MSG = "이름은 한글 실명(2~10자, 띄어쓰기 없이)으로 입력해 주세요.";
+
 const $ = (id) => document.getElementById(id);
 let db = null;
-let prompts = [];
+let prompts = [], comments = [], reviews = [];
 let isAdmin = false;
 let editingId = null;
+const opened = new Set();                   // 펼쳐 둔 카드
+
+/* ---------- 기기 안 저장 (이메일, 내 이름) ---------- */
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
 
 /* ---------- 시작 ---------- */
 (async function start() {
   if (!window.supabase || !SUPABASE_URL.startsWith("https:")) {
-    $("list").innerHTML = '<p class="msg err">아직 저장소가 연결되지 않았습니다.<br>index.html 안의 SUPABASE_URL 과 SUPABASE_KEY 를 입력해 주세요.</p>';
+    $("list").innerHTML = '<p class="msg err">아직 저장소가 연결되지 않았습니다.</p>';
     return;
   }
   db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -163,24 +224,32 @@ let editingId = null;
     if (location.hash === "#admin" && !isAdmin) showLogin();
   });
 
+  $("rName").value = store.get("myName");
   await load();
 })();
 
-/* ---------- 불러오기 / 화면 그리기 ---------- */
+/* ---------- 불러오기 ---------- */
 async function load() {
-  const { data, error } = await db.from("prompts")
-    .select("id,title,category,body,created_at")
-    .order("created_at", { ascending: false });
-  if (error) {
+  const [p, c, r] = await Promise.all([
+    db.from("prompts").select("id,title,category,body,created_at").order("created_at", { ascending: false }),
+    db.from("comments").select("id,prompt_id,name,content,created_at").order("created_at", { ascending: true }),
+    db.from("reviews").select("id,name,content,created_at").order("created_at", { ascending: false })
+  ]);
+  if (p.error) {
     $("list").innerHTML = '<p class="msg err">목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>';
-    console.error(error);
+    console.error(p.error);
     return;
   }
-  prompts = data || [];
+  prompts = p.data || [];
+  comments = c.error ? [] : (c.data || []);
+  reviews = r.error ? [] : (r.data || []);
   render();
 }
 
-function render() {
+function render() { renderPrompts(); renderReviews(); }
+
+/* ---------- 프롬프트 목록 ---------- */
+function renderPrompts() {
   const q = $("search").value.trim().toLowerCase();
   const shown = prompts.filter(p =>
     !q || [p.title, p.category, p.body].some(v => (v || "").toLowerCase().includes(q)));
@@ -190,49 +259,224 @@ function render() {
   if (!shown.length) {
     $("list").innerHTML = `<p class="msg">${prompts.length ? "검색 결과가 없습니다." : "등록된 프롬프트가 없습니다."}</p>`;
   } else {
-    $("list").innerHTML = shown.map(p => `
-      <article class="card">
-        <h2>${esc(p.title)}</h2>
-        ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
-        <p class="body">${esc(p.body)}</p>
-        <button class="copy" data-copy="${p.id}">📋 복사하기</button>
-        ${isAdmin ? `<div class="row">
-          <button class="edit" data-edit="${p.id}">수정</button>
-          <button class="del" data-del="${p.id}">삭제</button>
-        </div>` : ""}
-      </article>`).join("");
+    $("list").innerHTML = shown.map(cardHtml).join("");
   }
 
   const cats = [...new Set(prompts.map(p => p.category).filter(Boolean))];
   $("catList").innerHTML = cats.map(c => `<option value="${esc(c)}">`).join("");
 }
 
+function cardHtml(p) {
+  const open = opened.has(p.id);
+  const cs = comments.filter(c => c.prompt_id === p.id);
+  return `
+  <article class="card" id="card-${p.id}">
+    <h2>${esc(p.title)}</h2>
+    ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
+    <p class="body ${open ? "" : "clamp"}">${esc(p.body)}</p>
+    <div class="row">
+      <button class="toggle" data-toggle="${p.id}">${open ? "접기 ▲" : "펼쳐 보기 ▼"}</button>
+      <button class="copy" data-copy="${p.id}">📋 복사하기</button>
+    </div>
+    ${open ? commentsHtml(p.id, cs) : `<p class="meta">💬 댓글 ${cs.length}개</p>`}
+    ${isAdmin ? `<div class="row">
+      <button class="edit" data-edit="${p.id}">수정</button>
+      <button class="del" data-del="${p.id}">삭제</button>
+    </div>` : ""}
+  </article>`;
+}
+
+function commentsHtml(pid, cs) {
+  return `
+  <div class="comments">
+    <h3>💬 댓글 ${cs.length}개</h3>
+    ${cs.map(c => itemHtml("c", c, "cmt")).join("")}
+    <div class="cform">
+      <input type="text" id="cn-${pid}" placeholder="이름 (실명)" value="${esc(store.get("myName"))}">
+      <input type="password" id="cp-${pid}" placeholder="비밀번호 (4자 이상)" style="margin-top:8px" autocomplete="new-password">
+      <p class="hint">비밀번호는 내 댓글을 고치거나 지울 때 필요합니다.</p>
+      <textarea id="ct-${pid}" placeholder="댓글을 입력하세요"></textarea>
+      <div class="row"><button class="primary" data-cpost="${pid}">댓글 등록</button></div>
+      <p class="err" id="cm-${pid}"></p>
+    </div>
+  </div>`;
+}
+
+/* 댓글·후기 한 개 (kind: "c"=댓글, "r"=후기) — 수정/삭제 상태 포함 */
+let act = null;   // { kind, id, mode: "edit" | "del" }
+function itemHtml(kind, it, cls) {
+  const mode = act && act.kind === kind && act.id === it.id ? act.mode : null;
+  const key = `${kind}-${it.id}`;
+  return `
+  <div class="${cls}">
+    <div class="who"><span><b>${esc(it.name)}</b><span class="date">${fmtDate(it.created_at)}</span></span>
+      ${mode ? "" : `<span>
+        <button class="small-btn" data-act="edit" data-kind="${kind}" data-id="${it.id}">수정</button>
+        <button class="small-del" data-act="del" data-kind="${kind}" data-id="${it.id}">삭제</button></span>`}
+    </div>
+    ${mode === "edit"
+      ? `<textarea id="ea-${key}" style="margin-top:8px">${esc(it.content)}</textarea>`
+      : `<p>${esc(it.content)}</p>`}
+    ${mode ? `
+      ${isAdmin ? `<p class="hint">관리자 권한으로 ${mode === "edit" ? "수정" : "삭제"}합니다.</p>`
+                : `<input type="password" id="ep-${key}" placeholder="글 쓸 때 정한 비밀번호" style="margin-top:8px" autocomplete="off">`}
+      <div class="row">
+        <button class="${mode === "edit" ? "primary" : "del"}" data-ok="${key}">${mode === "edit" ? "수정 저장" : "삭제하기"}</button>
+        <button class="plain" data-cancel="1">취소</button>
+      </div>
+      <p class="err" id="em-${key}"></p>` : ""}
+  </div>`;
+}
+
+/* ---------- 수업 후기 목록 ---------- */
+function renderReviews() {
+  $("rcount").textContent = `후기 ${reviews.length}개`;
+  $("rlist").innerHTML = reviews.length
+    ? reviews.map(r => itemHtml("r", r, "card review")).join("")
+    : '<p class="msg">아직 등록된 후기가 없습니다.</p>';
+}
+
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
+function fmtDate(d) {
+  try { return new Date(d).toLocaleDateString("ko-KR", { month: "long", day: "numeric" }); } catch { return ""; }
+}
 
-$("search").addEventListener("input", render);
+$("search").addEventListener("input", renderPrompts);
 
-/* ---------- 복사 / 수정 / 삭제 버튼 ---------- */
+/* ---------- 탭 전환 ---------- */
+function showTab(name) {
+  const isP = name === "prompts";
+  $("tabPrompts").classList.toggle("on", isP);
+  $("tabReviews").classList.toggle("on", !isP);
+  $("promptView").hidden = !isP;
+  $("reviewView").hidden = isP;
+  $("search").hidden = !isP;
+  $("newBtn").hidden = !isP;
+  window.scrollTo(0, 0);
+}
+$("tabPrompts").addEventListener("click", () => showTab("prompts"));
+$("tabReviews").addEventListener("click", () => showTab("reviews"));
+
+/* ---------- 프롬프트 카드 버튼들 ---------- */
 $("list").addEventListener("click", async (e) => {
   const b = e.target.closest("button");
   if (!b) return;
   const find = (id) => prompts.find(p => p.id === id);
 
+  if (b.dataset.toggle) {
+    const id = b.dataset.toggle;
+    opened.has(id) ? opened.delete(id) : opened.add(id);
+    renderPrompts();
+    if (!opened.has(id)) $("card-" + id)?.scrollIntoView({ block: "nearest" });
+  }
   if (b.dataset.copy) {
     const p = find(b.dataset.copy);
     if (p && await copyText(p.body)) toast("복사되었습니다");
     else toast("복사에 실패했습니다. 본문을 길게 눌러 복사해 주세요");
   }
+  if (b.dataset.cpost) await postComment(b.dataset.cpost, b);
   if (b.dataset.edit) openEditor(find(b.dataset.edit));
   if (b.dataset.del) {
     const p = find(b.dataset.del);
-    if (!p || !confirm(`'${p.title}' 을(를) 삭제할까요?`)) return;
+    if (!p || !confirm(`'${p.title}' 을(를) 삭제할까요?\n(달린 댓글도 함께 삭제됩니다)`)) return;
     const { error } = await db.from("prompts").delete().eq("id", p.id);
     if (error) return alert("삭제하지 못했습니다: " + error.message);
     await load();
   }
+});
+
+/* ---------- 댓글·후기 수정/삭제 (두 화면 공통) ---------- */
+document.querySelector("main").addEventListener("click", async (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.act) {
+    act = { kind: b.dataset.kind, id: b.dataset.id, mode: b.dataset.act };
+    render();
+    const key = `${act.kind}-${act.id}`;
+    ($("ep-" + key) || $("ea-" + key))?.focus();
+  }
+  if (b.dataset.cancel) { act = null; render(); }
+  if (b.dataset.ok) await confirmAct(b);
+});
+
+async function confirmAct(btn) {
+  const { kind, id, mode } = act;
+  const key = `${kind}-${id}`;
+  const msg = $("em-" + key);
+  const table = kind === "c" ? "comments" : "reviews";
+  const word = kind === "c" ? "comment" : "review";
+  const content = mode === "edit" ? $("ea-" + key).value.trim() : null;
+  const max = kind === "c" ? 500 : 1000;
+  msg.textContent = "";
+  if (mode === "edit" && !content) { msg.textContent = "내용을 입력해 주세요."; return; }
+  if (mode === "edit" && content.length > max) { msg.textContent = `${max}자까지 쓸 수 있습니다.`; return; }
+
+  btn.disabled = true;
+  let ok = false;
+  if (isAdmin) {
+    const q = mode === "edit"
+      ? db.from(table).update({ content }).eq("id", id).select("id")
+      : db.from(table).delete().eq("id", id).select("id");
+    const { data, error } = await q;
+    ok = !error && data && data.length > 0;
+  } else {
+    const pw = $("ep-" + key).value;
+    if (!pw) { btn.disabled = false; msg.textContent = "비밀번호를 입력해 주세요."; return; }
+    const { data, error } = mode === "edit"
+      ? await db.rpc(`edit_${word}`, { p_id: id, p_pw: pw, p_content: content })
+      : await db.rpc(`delete_${word}`, { p_id: id, p_pw: pw });
+    if (error) console.error(error);
+    if (!error && data === false) { btn.disabled = false; msg.textContent = "비밀번호가 맞지 않습니다."; return; }
+    ok = !error && data === true;
+  }
+  btn.disabled = false;
+  if (!ok) { msg.textContent = "처리하지 못했습니다. 잠시 후 다시 시도해 주세요."; return; }
+  act = null;
+  toast(mode === "edit" ? "수정되었습니다" : "삭제되었습니다");
+  await load();
+}
+
+/* ---------- 댓글 등록 ---------- */
+async function postComment(pid, btn) {
+  const name = $("cn-" + pid).value.trim();
+  const pw = $("cp-" + pid).value;
+  const content = $("ct-" + pid).value.trim();
+  const msg = $("cm-" + pid);
+  msg.textContent = "";
+  if (!NAME_RE.test(name)) { msg.textContent = NAME_MSG; return; }
+  if (pw.length < 4) { msg.textContent = "비밀번호를 4자 이상 정해 주세요."; return; }
+  if (!content) { msg.textContent = "댓글 내용을 입력해 주세요."; return; }
+  if (content.length > 500) { msg.textContent = "댓글은 500자까지 쓸 수 있습니다."; return; }
+  btn.disabled = true;
+  const { error } = await db.rpc("add_comment", { p_prompt: pid, p_name: name, p_content: content, p_pw: pw });
+  btn.disabled = false;
+  if (error) { msg.textContent = "등록하지 못했습니다. 잠시 후 다시 시도해 주세요."; console.error(error); return; }
+  store.set("myName", name);
+  toast("댓글이 등록되었습니다");
+  await load();
+}
+
+/* ---------- 수업 후기 등록 ---------- */
+$("rPost").addEventListener("click", async () => {
+  const name = $("rName").value.trim();
+  const pw = $("rPw").value;
+  const content = $("rText").value.trim();
+  $("rMsg").textContent = "";
+  if (!NAME_RE.test(name)) { $("rMsg").textContent = NAME_MSG; return; }
+  if (pw.length < 4) { $("rMsg").textContent = "비밀번호를 4자 이상 정해 주세요."; return; }
+  if (!content) { $("rMsg").textContent = "후기 내용을 입력해 주세요."; return; }
+  if (content.length > 1000) { $("rMsg").textContent = "후기는 1000자까지 쓸 수 있습니다."; return; }
+  $("rPost").disabled = true;
+  const { error } = await db.rpc("add_review", { p_name: name, p_content: content, p_pw: pw });
+  $("rPost").disabled = false;
+  if (error) { $("rMsg").textContent = "등록하지 못했습니다. 잠시 후 다시 시도해 주세요."; console.error(error); return; }
+  store.set("myName", name);
+  $("rText").value = ""; $("rPw").value = "";
+  toast("후기가 등록되었습니다");
+  await load();
 });
 
 /* 본문만, 원래 줄바꿈 그대로 복사 */
@@ -241,7 +485,6 @@ async function copyText(text) {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    // 오래된 휴대폰 브라우저용 예비 방법
     const ta = document.createElement("textarea");
     ta.value = text;
     ta.setAttribute("readonly", "");
@@ -265,13 +508,9 @@ function toast(msg) {
 }
 
 /* ---------- 관리자 로그인 ---------- */
-/* 이 기기에서 마지막으로 로그인한 이메일 기억 (기기 안에만 저장, 화면 코드에는 없음) */
-function savedEmail() { try { return localStorage.getItem("adminEmail") || ""; } catch { return ""; } }
-function saveEmail(v) { try { localStorage.setItem("adminEmail", v); } catch {} }
-
 function showLogin() {
   $("loginPanel").hidden = false;
-  const em = savedEmail();
+  const em = store.get("adminEmail");
   if (em && !$("email").value) $("email").value = em;
   ($("email").value ? $("password") : $("email")).focus();
 }
@@ -290,7 +529,7 @@ $("loginBtn").addEventListener("click", async () => {
     email: $("email").value.trim(), password: $("password").value
   });
   if (error) { $("loginMsg").textContent = "로그인 실패: 이메일과 비밀번호를 확인해 주세요."; return; }
-  saveEmail($("email").value.trim());
+  store.set("adminEmail", $("email").value.trim());
   $("password").value = "";
   hideLogin();
 });
@@ -305,7 +544,7 @@ function setAdmin(on) {
   render();
 }
 
-/* ---------- 추가 / 수정 ---------- */
+/* ---------- 프롬프트 추가 / 수정 ---------- */
 $("newBtn").addEventListener("click", () => openEditor(null));
 $("cancelBtn").addEventListener("click", () => { $("editor").hidden = true; });
 
@@ -335,7 +574,6 @@ $("saveBtn").addEventListener("click", async () => {
     : await db.from("prompts").insert(row).select();
   $("saveBtn").disabled = false;
 
-  // 보안 규칙에 막히면 오류 또는 '바뀐 줄 0개'가 돌아옴
   if (res.error || !res.data || !res.data.length) {
     $("editorMsg").textContent = "저장하지 못했습니다. 관리자 계정인지 확인해 주세요.";
     return;
