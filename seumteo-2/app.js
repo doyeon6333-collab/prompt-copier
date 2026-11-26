@@ -73,6 +73,7 @@
       qStatus.textContent = "";
     }
     emptyState.hidden = !(term && shown === 0);
+    measure();
   }
 
   function escapeHtml(s) {
@@ -96,9 +97,16 @@
   function measure() {
     Array.prototype.forEach.call(document.querySelectorAll(".pbody"), function (body) {
       var btn = body.parentElement.querySelector(".toggle");
-      if (!btn) return;
-      if (body.classList.contains("is-open")) { btn.hidden = false; return; }
-      btn.hidden = body.scrollHeight <= body.clientHeight + 6;
+      if (body.classList.contains("is-open")) {
+        body.classList.remove("is-fits");
+        if (btn) btn.hidden = false;
+        return;
+      }
+      // hidden row/card: keep the last measured state
+      if (body.clientHeight <= 0) return;
+      var fits = body.scrollHeight <= body.clientHeight + 6;
+      body.classList.toggle("is-fits", fits);
+      if (btn) btn.hidden = fits;
     });
   }
 
@@ -110,7 +118,10 @@
       var open = body.classList.toggle("is-open");
       btn.textContent = open ? "접기" : "전체 보기";
       btn.setAttribute("aria-expanded", String(open));
-      if (!open) body.closest(".card").scrollIntoView({ block: "nearest", behavior: "smooth" });
+      if (!open) {
+        body.closest(".card").scrollIntoView({ block: "nearest", behavior: "smooth" });
+        measure();
+      }
     });
   });
 
@@ -220,6 +231,7 @@
 
   /* ---------- init ---------- */
   window.addEventListener("load", measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
   var mTimer = null;
   window.addEventListener("resize", function () {
     clearTimeout(mTimer);

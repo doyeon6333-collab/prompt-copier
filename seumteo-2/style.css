@@ -210,6 +210,15 @@ main{padding-bottom:20px}
 /* ---------- prompt card ---------- */
 .pcard--feature{grid-column:1/-1}
 .pcard--feature .pbody{max-height:270px}
+.pbody-cap{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  margin:15px 0 0;padding-bottom:6px;
+  border-bottom:1px dashed var(--line);
+  font-size:11.5px;letter-spacing:.02em;
+}
+.pbody-cap span{font-weight:800;color:var(--coral-dark)}
+.pbody-cap em{font-style:normal;font-weight:600;font-size:11px;color:#9d968a}
+.pbody-cap+.pbody{margin-top:9px}
 .pbody{
   position:relative;
   margin:13px 0 0;
@@ -234,6 +243,7 @@ main{padding-bottom:20px}
   pointer-events:none;transition:opacity .2s;
 }
 .pbody.is-open::after{opacity:0}
+.pbody.is-fits::after{opacity:0}
 .toggle{
   align-self:flex-start;margin-top:8px;
   border:0;background:transparent;color:var(--coral-dark);
